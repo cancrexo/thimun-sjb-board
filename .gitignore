@@ -1,0 +1,13 @@
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.idea/
+.vscode/
+*.swp
+*~
+
+# Log diario en la raiz del plugin: debug_YYYY-MM-DD.log
+*.log
