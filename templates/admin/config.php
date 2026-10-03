@@ -27,10 +27,11 @@ $switches_config = [
             <?php endforeach; ?>
         </div>
         <a class="button button-primary update-sjb-form-options"><?php _e( 'Update', 'sjb_board' ); ?></a>
-        <div class="ajax-save-result"></div>
     </div>
 
     <div class="sjb-tab-panel" data-panel="info" hidden>
         <p class="sjb-coming-soon">coming soon</p>
     </div>
+
+    <div class="sjb-toast ajax-save-result hidden" role="status" aria-live="polite"></div>
 </div>

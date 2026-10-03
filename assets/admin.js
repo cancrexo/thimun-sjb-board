@@ -32,11 +32,16 @@
         });
     }
 
-    const toggleSaveMessage = (exito = true) => {
-        div_messages.textContent = exito ? 'Saved!!' : 'Error!!';
+    let toastTimer = null;
+
+    const showToast = (exito, msg) => {
+        div_messages.textContent = msg || (exito ? 'Saved' : 'Error');
         div_messages.classList.remove('hidden', 'exito', 'error');
         div_messages.classList.add(exito ? 'exito' : 'error');
-        setTimeout(() => div_messages.classList.add('hidden'), 1000);
+        if (toastTimer) {
+            clearTimeout(toastTimer);
+        }
+        toastTimer = setTimeout(() => div_messages.classList.add('hidden'), 3000);
     };
 
     const saveOptionsForm = () => {
@@ -59,10 +64,11 @@
             cache: false,
             data: data2Send,
             success: function (jsonData) {
-                toggleSaveMessage(jsonData.exito);
+                const ok = !!(jsonData && jsonData.exito);
+                showToast(ok, ok ? 'Saved' : (jsonData && jsonData.msg));
             },
             error: function () {
-                toggleSaveMessage(false);
+                showToast(false, 'Error');
             }
         });
     };
