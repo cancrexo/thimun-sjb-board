@@ -1,43 +1,47 @@
 <?php
 /*
-	Plugin Name: SJB Board
-	Plugin URI: http://www.sjbdixtal.es
-	Description: Simple Message System Plugin
-	Author:Cancrexo - SJB Dixital
-	Version: 1.0
-	Author URI: http://www.sjbdixital.es
-	@package sjb-board
+    Plugin Name: SJB Board
+    Plugin URI: http://www.sjbdixtal.es
+    Description: Simple Message System Plugin
+    Author:Cancrexo - SJB Dixital
+    Version: 2.0
+    Author URI: http://www.sjbdixital.es
+    Text Domain: sjb_board
+    @package sjb-board
 */
 
 defined(  'ABSPATH'  ) OR exit;
+
 /*
-  _                 __  __               _                       _          _                               _
- | |       __ _    |  \/  |   __ _    __| |  _ __    ___      __| |   ___  | |     ___    ___    _ __    __| |   ___   _ __    ___
- | |      / _` |   | |\/| |  / _` |  / _` | | '__|  / _ \    / _` |  / _ \ | |    / __|  / _ \  | '__|  / _` |  / _ \ | '__|  / _ \
- | |___  | (_| |   | |  | | | (_| | | (_| | | |    |  __/   | (_| | |  __/ | |   | (__  | (_) | | |    | (_| | |  __/ | |    | (_) |
- |_____|  \__,_|   |_|  |_|  \__,_|  \__,_| |_|     \___|    \__,_|  \___| |_|    \___|  \___/  |_|     \__,_|  \___| |_|     \___/
+   ___            _          _                                  _   _
+  / _ \   _   _  (_)   ___  | |_    ___    _ __   _ __   _ __  | | | |
+ | | | | | | | | | |  / _ \ | __|  / _ \  | '__| | '__| | '__| | | | |
+ | |_| | | |_| | | | |  __/ | |_  | (_) | | |    | |    | |    |_| |_|
+  \__\_\  \__,_| |_|  \___|  \__|  \___/  |_|    |_|    |_|    (_) (_)
+
 
 */
 
+
 require dirname(__FILE__) . '/classes/SJBPluginClass.php';
 
-register_activation_hook(    __FILE__, array(  'SJB_BOARD', 'on_activation'  )  );
+register_activation_hook(    __FILE__, [  'SJB_BOARD', 'on_activation'  ]  );
 
-register_deactivation_hook(  __FILE__, array(  'SJB_BOARD', 'on_deactivation'  )  );
+register_deactivation_hook(  __FILE__, [  'SJB_BOARD', 'on_deactivation'  ]  );
 
 
-//register_uninstall_hook(     __FILE__, array(  'SJB_BOARD', 'on_uninstall'  )  );
-//add_action(  'plugins_loaded', array(  'SJB_BOARD', 'init'  )  );
+//register_uninstall_hook(     __FILE__, [  'SJB_BOARD', 'on_uninstall'  ]  );
+//add_action(  'plugins_loaded', [  'SJB_BOARD', 'init'  ]  );
 
 /*
-	El plugin crea una página en el sistema wordpress. Dicha página es la que, a traves de un shortcode
-	presenta las distintas encuestas en pantalla
+    El plugin crea una página en el sistema wordpress. Dicha página es la que, a traves de un shortcode
+    presenta las distintas encuestas en pantalla
 
 */
 
 class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
-	const
+    const
 
         necesitaConfig      = 1,
 
@@ -53,45 +57,45 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         MESSAGE_COMPOSE_SLUG    = 'sjb-message-compose', // peich co shortcode redactar novo mensaxe
         MESSAGE_MODERATION_SLUG = 'sjb-message-moderation', // peich co shortcode redactar novo mensaxe
 
-		NAMAIS                  = null ,
+        NAMAIS                  = null ,
 
         DEFAULT_PAGE_SIZE       = 8;
 
-	static
+    static
 
-		$version = '1.1',
+        $version = '2.0',
 
         $title = 'SJB Board', // usado para slug, noslug, prefixo en variable optiosn, etc.
 
         $MODERATION_ENABLED = 0, // SI SE DEBEN APROBAR ANTES
 
-        $options_keys = array(
+        $options_keys = [
             'moderation'    =>1,
-			'in_footer'				=> 1,
-			'delete_onuninstall'	=> 0,
+            'in_footer'				=> 1,
+            'delete_onuninstall'	=> 0,
             'debug_mode'	=> 1,
-        ),
+        ],
 
 
-		$NA  = null;
+        $NA  = null;
 
 
     public
 
-        $new_message_valid_keys= array(
+        $new_message_valid_keys= [
             'asunto'            => NULL,
             'mensaxe'           => NULL,
             'mesage_parent_id'    => 0,
             'thread_id'    => 0,
             'recipients'    => NULL
-        ),
+        ],
 
 
-        $reply_message_valid_keys= array(
+        $reply_message_valid_keys= [
             'asunto'            => NULL,
             'mensaxe'           => NULL,
             'msg_id'            => 0,
-        );
+        ];
     protected
 
         $USER,  // Usuario actualmente logueado
@@ -102,48 +106,50 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
 
 
-	/*
-		Constructor -->executase no parent e despois chama a after construcT??
+    /*
+        Constructor -->executase no parent e despois chama a after construcT??
     */
 
     public function afterParentConstruct(){
 
+        // Instalacion nueva o plugin ya activo: crea los indices de la 2.0 si faltan
+        add_action('init', ['SJB_BOARD', 'upgrade_database']);
 
-		/**
-		 *  Filtros para CPT en backend
-		 *  Añade columnas ao listado
-         *  add_filter('manage_'.$OSTRAS.'_posts_columns', array(&$this, $OSTRAS.'_table_head')); // Table header
+        /**
+         *  Filtros para CPT en backend
+         *  Añade columnas ao listado
+         *  add_filter('manage_'.$OSTRAS.'_posts_columns', [$this, $OSTRAS.'_table_head']); // Table header
          */
 
-		//add_filter('manage_product_posts_columns', array(&$this, 'product_table_head')); // Table header
+        //add_filter('manage_product_posts_columns', [$this, 'product_table_head']); // Table header
 
-		// // Añade contido as columnas:
-		// add_action( 'manage_product_posts_custom_column' , array(&$this,'product_table_content'), 10, 2 );
+        // // Añade contido as columnas:
+        // add_action( 'manage_product_posts_custom_column' , [$this,'product_table_content'], 10, 2 );
 
-		// // make it sortable
-		// add_filter( 'manage_edit-product_sortable_columns', array(&$this, 'product_sortable_columns') );
+        // // make it sortable
+        // add_filter( 'manage_edit-product_sortable_columns', [$this, 'product_sortable_columns'] );
 
-		// add_action( 'pre_get_posts', array(&$this, 'product_custom_orderby' ));
+        // add_action( 'pre_get_posts', [$this, 'product_custom_orderby' ]);
 
 
-		/*
-			Engade scripts CADA VEZ QUE ENTRAS NA PAXINA DE CONFIG (hai que indicar o slug!!)
-			Dependerá de onde teñas colocada a paxina do plugin, e decir, 'a ruta de acceso'!!
-			Si so ten unha paxina de config simpe, colgada por exemplo de settings:
-				add_action('admin_print_scripts-settings_page_'.$this->slug ,array(&$this, 'add_admin_scripts')); (?)
+        /*
+            Engade scripts CADA VEZ QUE ENTRAS NA PAXINA DE CONFIG (hai que indicar o slug!!)
+            Dependerá de onde teñas colocada a paxina do plugin, e decir, 'a ruta de acceso'!!
+            Si so ten unha paxina de config simpe, colgada por exemplo de settings:
+                add_action('admin_print_scripts-settings_page_'.$this->slug ,[$this, 'add_admin_scripts']); (?)
 
-			Si tes unha opcion propia (e decir fixeste un add_menu_page)
-			admin_print_scripts + slug deste plugin +  _page_ + slug-do-submenu (que o defines ti burro)
-			Logo farías
-			add_action('admin_print_scripts- + slug deste plugin +  _page_ + slug-do-submenu ' ,array(&$this, 'add_admin_scripts'));
+            Si tes unha opcion propia (e decir fixeste un add_menu_page)
+            admin_print_scripts + slug deste plugin +  _page_ + slug-do-submenu (que o defines ti burro)
+            Logo farías
+            add_action('admin_print_scripts- + slug deste plugin +  _page_ + slug-do-submenu ' ,[$this, 'add_admin_scripts']);
 
-            add_action('admin_print_scripts-solvenup-forms_page_solvenup-config-section' ,array(&$this, 'add_admin_scripts'));
+            add_action('admin_print_scripts-solvenup-forms_page_solvenup-config-section' ,[$this, 'add_admin_scripts']);
             ...
         */
-        add_action('init', array(&$this, 'setUserData')); // pq hai que esperar a que se cargue pluggable para detevaytr os usuarios
+        add_action('init', [$this, 'setUserData']); // pq hai que esperar a que se cargue pluggable para detevaytr os usuarios
 
-    	add_action('admin_print_scripts-settings_page_'.$this->slug ,array(&$this, 'add_admin_scripts'));
-		//add_action('admin_print_scripts-'.$this->slug.'_page_'.$this->slug.'-config-section' ,array(&$this, 'add_admin_scripts'));
+        add_action('admin_print_scripts-settings_page_'.$this->slug ,[$this, 'add_admin_scripts']);
+        //add_action('admin_print_scripts-'.$this->slug.'_page_'.$this->slug.'-config-section' ,[$this, 'add_admin_scripts']);
 
         // Registramos variable publicas
         $this->MAQUETADO = Sjbboard\classes\SJBMaquetado::getInstance();
@@ -152,79 +158,79 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
 
 
-		// Registramos queryvars
-		add_filter( 'query_vars',  array(&$this, 'add_custom_query_var') );
+        // Registramos queryvars
+        add_filter( 'query_vars',  [$this, 'add_custom_query_var'] );
 
         // Filtramos directorio de contactos basado en user role e comitee
-        add_filter( 'sjbboard_filter_contacts', array(&$this,'filter_by_comitee'), 10, 1 );
+        add_filter( 'sjbboard_filter_contacts', [$this,'filter_by_comitee'], 10, 1 );
 
         // Aviso novas mensaxes
-        add_action( 'show_new_messages_warning', array(&$this,'action_show_new_messages_banner'), 10, 0);
+        add_action( 'show_new_messages_warning', [$this,'action_show_new_messages_banner'], 10, 0);
         //add_filter( 'age_range', 'add_new_age_range', 10, 1 );
 
 
         // Shortcodes
-		if( function_exists( 'vc_map' ) )
-		add_action( 'vc_before_init', array(&$this,'map_vc_shortcodes') );
+        if( function_exists( 'vc_map' ) )
+        add_action( 'vc_before_init', [$this,'map_vc_shortcodes'] );
 
-        add_shortcode('sjb-board', array(&$this, 'shortcode_message_board'));
-        add_shortcode('sjb-board-compose', array(&$this, 'shortcode_message_compose')); // Novo mensaxe
-        add_shortcode('sjb-board-thread', array(&$this, 'shortcode_message_thread')); // conversación /ver mensaxe
-        add_shortcode('sjb-board-moderations', array(&$this, 'shortcode_message_moderation')); // conversación /ver mensaxe
+        add_shortcode('sjb-board', [$this, 'shortcode_message_board']);
+        add_shortcode('sjb-board-compose', [$this, 'shortcode_message_compose']); // Novo mensaxe
+        add_shortcode('sjb-board-thread', [$this, 'shortcode_message_thread']); // conversación /ver mensaxe
+        add_shortcode('sjb-board-moderations', [$this, 'shortcode_message_moderation']); // conversación /ver mensaxe
         //var_dump('after eso');
 
-        //add_action('show_new_messages_warning', array(&$this,'show_new_messages_banner'), 10, 1);
+        //add_action('show_new_messages_warning', [$this,'show_new_messages_banner'], 10, 1);
 
-	}
+    }
 
-	public function map_vc_shortcodes( ) {
+    public function map_vc_shortcodes( ) {
 
-		$category = __( 'SJB Shortcodes' );
+        $category = __( 'SJB Shortcodes' );
 
-		$shortcodes = array(
-			array( 'base' => 'sjb-board', 'name' => __( 'SJB Board System' ),
-			'icon' =>  $this->pluginpath . '/assets/img/sjb-logo-75x75.png'),
+        $shortcodes = [
+            [ 'base' => 'sjb-board', 'name' => __( 'SJB Board System' ),
+            'icon' =>  $this->pluginpath . '/assets/img/sjb-logo-75x75.png'],
 
-			array( 'base' => 'sjb-board-compose', 'name' => __( 'SJB Board Compose' ),
-			'icon' =>  $this->pluginpath . '/assets/img/sjb-logo-75x75.png'),
+            [ 'base' => 'sjb-board-compose', 'name' => __( 'SJB Board Compose' ),
+            'icon' =>  $this->pluginpath . '/assets/img/sjb-logo-75x75.png'],
 
-			array( 'base' => 'sjb-board-thread', 'name' => __( 'SJB Board Thread!' ),
-			'icon' =>  $this->pluginpath . '/assets/img/sjb-logo-75x75.png'),
+            [ 'base' => 'sjb-board-thread', 'name' => __( 'SJB Board Thread!' ),
+            'icon' =>  $this->pluginpath . '/assets/img/sjb-logo-75x75.png'],
 
-			array( 'base' => 'sjb-board-moderations', 'name'=> __( 'SJB Board Moderation' ),
-			'icon' =>  $this->pluginpath . '/assets/img/sjb-logo-75x75.png'),
-
-
-		);
-		foreach($shortcodes as $S){
-			$S['category']= $category;
-			vc_map($S);
-		}
+            [ 'base' => 'sjb-board-moderations', 'name'=> __( 'SJB Board Moderation' ),
+            'icon' =>  $this->pluginpath . '/assets/img/sjb-logo-75x75.png'],
 
 
-	   }
-
-	/*
-					  ____       _       ____   _  __  _____   _   _   ____      ____    _____   _   _   _____   _____
-					 | __ )     / \     / ___| | |/ / | ____| | \ | | |  _ \    / ___|  |_   _| | | | | |  ___| |  ___|
-					 |  _ \    / _ \   | |     | ' /  |  _|   |  \| | | | | |   \___ \    | |   | | | | | |_    | |_
-					 | |_) |  / ___ \  | |___  | . \  | |___  | |\  | | |_| |    ___) |   | |   | |_| | |  _|   |  _|
-					 |____/  /_/   \_\  \____| |_|\_\ |_____| |_| \_| |____/    |____/    |_|    \___/  |_|     |_|
-
-	*/
+        ];
+        foreach($shortcodes as $S){
+            $S['category']= $category;
+            vc_map($S);
+        }
 
 
-	// Colgamos estas páxinas dentro de contac For 7?
-	public function admin_create_menus(){
+       }
+
+    /*
+                      ____       _       ____   _  __  _____   _   _   ____      ____    _____   _   _   _____   _____
+                     | __ )     / \     / ___| | |/ / | ____| | \ | | |  _ \    / ___|  |_   _| | | | | |  ___| |  ___|
+                     |  _ \    / _ \   | |     | ' /  |  _|   |  \| | | | | |   \___ \    | |   | | | | | |_    | |_
+                     | |_) |  / ___ \  | |___  | . \  | |___  | |\  | | |_| |    ___) |   | |   | |_| | |  _|   |  _|
+                     |____/  /_/   \_\  \____| |_|\_\ |_____| |_| \_| |____/    |____/    |_|    \___/  |_|     |_|
+
+    */
+
+
+    // Colgamos estas páxinas dentro de contac For 7?
+    public function admin_create_menus(){
         // Paxina de config
 
         add_submenu_page(
             static::$perchero, 					// $parent_slug  -->O PERCHERO!!
-            __( 'Configuración', static::SJB_TD ),	// Page Title
+            __( 'Configuración', 'sjb_board' ),	// Page Title
             static::$title,                       	// Menu Title
             'manage_options', 							// Capabilities de editor
             $this->slug,			// Menu slug
-            array(&$this, 'show_config') 			// metodo a chamar
+            [$this, 'show_config'] 			// metodo a chamar
         );
 
     }
@@ -254,8 +260,8 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         $vars[] = 'message_id';
         $vars[] = 'status_id';
 
-		return $vars;
-	}
+        return $vars;
+    }
 
 
 
@@ -269,45 +275,50 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
 
 
-	/*
+    /*
                             _        _
                            / \      (_)   __ _  __  __
                           / _ \     | |  / _` | \ \/ /
                          / ___ \    | | | (_| |  >  <
                         /_/   \_\  _/ |  \__,_| /_/\_\
                                   |__/
-	*/
+    */
 
 
 
 
 
-	public function procesa_ajax() {
+    public function procesa_ajax() {
 
-		// Salida por defecto:
-		$this->ajax_json = array( 'exito' => false, 'msg'=>'{NOT_DEFINED}', 'datos'=>'{NOT_DEFINED}' );
+        // Salida por defecto:
+        $this->ajax_json = [ 'exito' => false, 'msg'=>'{NOT_DEFINED}', 'datos'=>'{NOT_DEFINED}' ];
 
 
-		$nonce = isset($_POST['sjb_noncename']) ? htmlspecialchars($_POST['sjb_noncename'], ENT_QUOTES) : '';
-		$valid_nonce = wp_verify_nonce( $nonce, static::NONCENAME ); // wp_verify_nonce( string $nonce, string|int $action = -1
+        $nonce = isset($_POST['sjb_noncename']) ? htmlspecialchars($_POST['sjb_noncename'], ENT_QUOTES) : '';
+        $valid_nonce = wp_verify_nonce( $nonce, static::NONCENAME ); // wp_verify_nonce( string $nonce, string|int $action = -1
 
-		// En acceso post validas TOKEN Y DEBE EXISTIR la cookie
-		if( !$valid_nonce ){
-			$this->ajax_json['msg'] = 'SJB Security Error';
+        // En acceso post validas TOKEN Y DEBE EXISTIR la cookie
+        if( !$valid_nonce ){
+            $this->ajax_json['msg'] = 'SJB Security Error';
 
-		}else{
+        }else{
 
             $quefacemos = isset($_POST['quefasemos']) ? htmlspecialchars($_POST['quefasemos'], ENT_QUOTES) : 'frontend';
 
             switch($quefacemos){
 
                 case 'backend':
+                    // Solo un administrador puede guardar las opciones
+                    if( ! current_user_can( 'manage_options' ) ){
+                        $this->ajax_json = [ 'exito' => false, 'msg' => 'User not authorized' ];
+                        break;
+                    }
                     $current_options = static::loadOptions(true);
                     $data = $_POST['myplugindata'];
                     $data = array_change_key_case((array)$data, CASE_LOWER);
                     $data2Save = shortcode_atts(static::$options_keys, $data);
                     static::saveOptions($data2Save );
-                    $this->ajax_json =array( 'exito' => true, 'msg'=>'Savedcohone!!' , 'datos' => $data2Save );
+                    $this->ajax_json =[ 'exito' => true, 'msg'=>'Savedcohone!!' , 'datos' => $data2Save ];
                 break;
 
                 case 'newmessage': // Nova mensaxes
@@ -348,49 +359,49 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
                     $this->ajax_json['msg'] = 'Error: unknown option! #' . $quefacemos .'#';
                 break;
             }
-		}
+        }
 
 
-		$this->displayAjax(); // Die();
-	}
-
-
-
+        $this->displayAjax(); // Die();
+    }
 
 
 
 
-	/*
-				  _____                          _     _____               _     ____    _              __    __
-				 |  ___|  _ __    ___    _ __   | |_  | ____|  _ __     __| |   / ___|  | |_   _   _   / _|  / _|
-				 | |_    | '__|  / _ \  | '_ \  | __| |  _|   | '_ \   / _` |   \___ \  | __| | | | | | |_  | |_
-				 |  _|   | |    | (_) | | | | | | |_  | |___  | | | | | (_| |    ___) | | |_  | |_| | |  _| |  _|
-				 |_|     |_|     \___/  |_| |_|  \__| |_____| |_| |_|  \__,_|   |____/   \__|  \__,_| |_|   |_|
-
-	*/
-
-	/*
-	 	CSS e JS en parte pública. :
-		Os scripts rexistranse pero non se encolan si non hai shortcode
-	*/
-	public function register_public_scripts() {
-
-		$options = static::loadOptions();
-
-		$infooter = true;//(bool)$options["in_footer"]; // TRUE
 
 
 
-		wp_register_style( $this->slug , $this->path2assets .'style.css'  );
-		wp_register_style( 'popinsfont' , 'https://fonts.googleapis.com/css2?family=Poppins:wght@100;500&display=swap'  );
+    /*
+                  _____                          _     _____               _     ____    _              __    __
+                 |  ___|  _ __    ___    _ __   | |_  | ____|  _ __     __| |   / ___|  | |_   _   _   / _|  / _|
+                 | |_    | '__|  / _ \  | '_ \  | __| |  _|   | '_ \   / _` |   \___ \  | __| | | | | | |_  | |_
+                 |  _|   | |    | (_) | | | | | | |_  | |___  | | | | | (_| |    ___) | | |_  | |_| | |  _| |  _|
+                 |_|     |_|     \___/  |_| |_|  \__| |_____| |_| |_|  \__,_|   |____/   \__|  \__,_| |_|   |_|
 
-		// Scripts
-		//
-		//wp_register_script($this->slug. '-jquery-ui-touch', 'https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js?ver=5.2.4', array('jquery-ui-core'), false, $infooter);
+    */
 
-        wp_register_script('sjbtools', $this->path2assets . 'SJBTools.js',array(), false, $infooter);
+    /*
+         CSS e JS en parte pública. :
+        Os scripts rexistranse pero non se encolan si non hai shortcode
+    */
+    public function register_public_scripts() {
 
-		//wp_register_script( 'jquery-ui-slider', 'wp-includes/js/jquery/ui/accordion.min.js' , array('jquery-ui-core'), false, $infooter);
+        $options = static::loadOptions();
+
+        $infooter = true;//(bool)$options["in_footer"]; // TRUE
+
+
+
+        wp_register_style( $this->slug , $this->path2assets .'style.css'  );
+        wp_register_style( 'popinsfont' , 'https://fonts.googleapis.com/css2?family=Poppins:wght@100;500&display=swap'  );
+
+        // Scripts
+        //
+        //wp_register_script($this->slug. '-jquery-ui-touch', 'https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js?ver=5.2.4', ['jquery-ui-core'], false, $infooter);
+
+        wp_register_script('sjbtools', $this->path2assets . 'SJBTools.js',[], false, $infooter);
+
+        //wp_register_script( 'jquery-ui-slider', 'wp-includes/js/jquery/ui/accordion.min.js' , ['jquery-ui-core'], false, $infooter);
 
         $pagename = get_query_var('pagename');
 
@@ -411,32 +422,33 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         }
 
         if(isset($script))
-        wp_register_script($this->slug, $this->path2assets . $script, array('jquery'), false, $infooter); // Common
+        wp_register_script($this->slug, $this->path2assets . $script, ['jquery'], false, $infooter); // Common
 
 
-		/* Creamos obxecto global JS para almacenar os valores do plugin */
-		$options = array(
-			'mensaje'		=> 'Dale alegria macarena',
-			'ajax_action'	=> 'sjbboardplugin',
-			'ajaxurl'       => admin_url( 'admin-ajax.php' ),
-			'ajax_nonce'    => wp_create_nonce(static::NONCENAME),
-		);
+        /* Creamos obxecto global JS para almacenar os valores do plugin */
+        $options = [
+            'mensaje'		=> 'Dale alegria macarena',
+            'ajax_action'	=> 'sjbboardplugin',
+            'ajaxurl'       => admin_url( 'admin-ajax.php' ),
+            'ajax_nonce'    => wp_create_nonce(static::NONCENAME),
+            'board_url'     => get_permalink( get_page_by_path( self::MESSAGE_BOARD_SLUG ) ),
+        ];
 
-		wp_localize_script(  $this->slug, static::WP_LOCALIZE_VARNAME , $options );
+        wp_localize_script(  $this->slug, static::WP_LOCALIZE_VARNAME , $options );
 
 
-	}
+    }
 
-	/*
-		'escribe' scripts
-	*/
-	public function print_public_scripts() {
-		if (!static::$add_script) {
-			return;
-		}
+    /*
+        'escribe' scripts
+    */
+    public function print_public_scripts() {
+        if (!static::$add_script) {
+            return;
+        }
 
-		wp_print_styles(array($this->slug, 'popinsfont'));
-		wp_print_scripts(array('jquery-ui-slider', $this->slug. '-jquery-ui-touch', $this->slug, 'sjbtools', 'jquery-effects-core')   );
+        wp_print_styles([$this->slug, 'popinsfont']);
+        wp_print_scripts(['jquery-ui-slider', $this->slug. '-jquery-ui-touch', $this->slug, 'sjbtools', 'jquery-effects-core']   );
 
     }
 
@@ -446,34 +458,53 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         global $wpdb;
         if(!is_user_logged_in()){
             //$role = 'notlogged';
-            $this->ajax_json =array( 'exito' => false, 'msg'=>'User not authorized');
+            $this->ajax_json =[ 'exito' => false, 'msg'=>'User not authorized'];
             return; //p.e. mensaxe de Please log in!! con enlace!! ou redrect ahome e pista
         }
-        // Lee mensaje. -->autor ->comitee_id debe coincidir con  $this->USER_INFO->comitee_id
-        // TODO...
+        $this->setUserData();
 
-        global $wpdb;
+        // Mismos roles que la pantalla de moderacion
+        if( ! in_array( $this->USER_INFO->role, [ 'administrative_staff', 'executive_administrative' ], true ) ){
+            $this->ajax_json = [ 'exito' => false, 'msg' => 'User not authorized' ];
+            return;
+        }
+
+        // administrative_staff solo modera notas de su comite. executive_administrative ve todos.
+        if( $this->USER_INFO->role != 'executive_administrative' ){
+            $author_committee = $wpdb->get_var( $wpdb->prepare(
+                "SELECT UM.meta_value
+                FROM {$wpdb->prefix}sjb_board_messages M
+                LEFT JOIN {$wpdb->prefix}usermeta UM ON UM.user_id = M.user_id AND UM.meta_key = 'committee'
+                WHERE M.message_id = %d",
+                (int) $id_message
+            ) );
+
+            if( null === $author_committee || (int) $author_committee !== (int) $this->USER_INFO->comitee_id ){
+                $this->ajax_json = [ 'exito' => false, 'msg' => 'User not authorized' ];
+                return;
+            }
+        }
 
         $tablename = $wpdb->prefix.'sjb_board_messages';
 
-        $data = array(
+        $data = [
             'message_id'=> (int)$id_message,
             'status'=> (int)$status
-        );
+        ];
 
         $updated = $wpdb->update(
             $tablename,
-            array(
+            [
                 'status' => (int)$status
-            ), // data
-            array(
+            ], // data
+            [
                 'message_id' => (int)$id_message
-            ), //where
+            ], //where
 
-            array(
+            [
                 '%d'  // value2
-            ),
-            array( '%d' ) // WHERE
+            ],
+            [ '%d' ] // WHERE
         );
 
         if(false !== $updated){
@@ -484,10 +515,10 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
                 case 2: $str = 'Message REJECTED'; break;
             }
 
-            $this->ajax_json =array( 'exito' => true, 'msg'=>$str);
+            $this->ajax_json =[ 'exito' => true, 'msg'=>$str];
 
         }else{
-            $this->ajax_json =array( 'exito' => false, 'msg'=>'Something happened in the way to heaven');// . $last_id );
+            $this->ajax_json =[ 'exito' => false, 'msg'=>'Something happened in the way to heaven'];// . $last_id );
         }
 
     }
@@ -498,19 +529,42 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         global $wpdb;
         if(!is_user_logged_in()){
             //$role = 'notlogged';
-            $this->ajax_json =array( 'exito' => false, 'msg'=>'User not authorized');
+            $this->ajax_json =[ 'exito' => false, 'msg'=>'User not authorized'];
             return; //p.e. mensaxe de Please log in!! con enlace!! ou redrect ahome e pista
         }
 
-        // $this->ajax_json =array( 'exito' => false, 'msg'=>'paramos  en ' . $last_id , 'datos'=>$data['recipients']);
-        if(!in_array($this->USER_INFO->role, array('delegate','student_officer')) ){
+        // $this->ajax_json =[ 'exito' => false, 'msg'=>'paramos  en ' . $last_id , 'datos'=>$data['recipients']];
+        if(!in_array($this->USER_INFO->role, ['delegate','student_officer']) ){
             $STATUS_DE_MENSAJE =  1;
         }else{
             $STATUS_DE_MENSAJE =  !(int)$this->options['moderation'];
         }
 
-        // return;
-        $destinatarios = $data['recipients']; // array.
+        // Solo destinatarios que ya estan en la agenda filtrada
+        $destinatarios = isset( $data['recipients'] ) ? $data['recipients'] : [];
+        if( ! is_array( $destinatarios ) || ! count( $destinatarios ) ){
+            $this->ajax_json = [ 'exito' => false, 'msg' => 'User not authorized' ];
+            return;
+        }
+
+        $permitidos = $this->getContacts( false );
+        $ids_permitidos = [];
+        if( is_array( $permitidos ) ){
+            foreach( $permitidos as $contacto ){
+                $ids_permitidos[] = (int) $contacto['ID'];
+            }
+        }
+
+        $destinatarios_ok = [];
+        foreach( $destinatarios as $dest ){
+            $dest_id = (int) $dest;
+            if( $dest_id < 1 || ! in_array( $dest_id, $ids_permitidos, true ) ){
+                $this->ajax_json = [ 'exito' => false, 'msg' => 'User not authorized' ];
+                return;
+            }
+            $destinatarios_ok[] = $dest_id;
+        }
+        $destinatarios = array_values( array_unique( $destinatarios_ok ) );
 
 
         // ------------------------------------
@@ -519,17 +573,17 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
         $tablename = $wpdb->prefix.'sjb_board_messages';
 
-        $data = array(
+        $data = [
             'user_id'=> $this->USER->ID,
             'mesage_parent_id'=> 0,// aqui dependerá de si é resposta
             'subject'=> sanitize_text_field($data['asunto']),
             'message'=> sanitize_textarea_field($data['mensaxe']),
             'status'=> $STATUS_DE_MENSAJE // so si e delegate ou so. TODO
-        );
+        ];
 
-        $filters = array(
+        $filters = [
             '%d', '%d', '%s', '%s', '%d'
-        );
+        ];
 
 
         //Grabar MENSAXE en tabla mensaxe
@@ -546,21 +600,21 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         // Agora o THREAD_ID:
         $updated = $wpdb->update(
             $tablename,
-            array(
+            [
                 'thread_id' => $last_id    // aqui dependerá de si é resposta
-            ),
-            array( 'message_id' => $last_id ),
+            ],
+            [ 'message_id' => $last_id ],
 
-            array(
+            [
                 '%d'    // value2
-            ),
-            array( '%d' )
+            ],
+            [ '%d' ]
         );
 
         // Agora insert en  todos  RECIPIENTS:
         $tableparticipants =  $wpdb->prefix.'sjb_board_participants';
 
-        $values = array();
+        $values = [];
         foreach ( $destinatarios as $dest ) {
             $values[] = sprintf('(%d,%d)', (int)$last_id, (int)$dest );
         }
@@ -575,7 +629,7 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         }else{
             $msg_ok = 'Message sent and awaiting moderation...';
         }
-        $this->ajax_json =array( 'exito' => true, 'msg'=> $msg_ok);// . $last_id );
+        $this->ajax_json =[ 'exito' => true, 'msg'=> $msg_ok];// . $last_id );
 
     }
 
@@ -602,7 +656,13 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         // message_id message_parent_id, thread_id, , user_id, date_add, subject, message, status
 
         if(false === $msg_info){
-            $this->ajax_json =array( 'exito' => false, 'msg'=>'Msg not found in reply action');// . $last_id );
+            $this->ajax_json =[ 'exito' => false, 'msg'=>'Msg not found in reply action'];// . $last_id );
+            return;
+        }
+
+        // La respuesta no puede ir dirigida a uno mismo
+        if( (int) $msg_info->user_id === (int) $this->USER->ID ){
+            $this->ajax_json = [ 'exito' => false, 'msg' => 'User not authorized' ];
             return;
         }
 
@@ -621,19 +681,19 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         // Tes que grabar un novo  colendo o memso therad pero poñer parent como msg_id
         $tablename = $wpdb->prefix.'sjb_board_messages';
 
-        $data = array(
+        $data = [
             'user_id'=> $this->USER->ID,
             'mesage_parent_id'=> $id2reply,// aqui dependerá de si é resposta
             'thread_id'=> (int)$msg_info->thread_id,
             'subject'=> sanitize_text_field($data['asunto']),
             'message'=> sanitize_textarea_field($data['mensaxe']),
             'status'=> $STATUS_DE_MENSAJE // so si e delegate ou so. TODO
-        );
+        ];
 
 
-        $filters = array(
+        $filters = [
             '%d', '%d', '%d', '%s', '%s', '%d'
-        );
+        ];
 
 
         //Grabar MENSAXE en tabla mensaxe
@@ -644,7 +704,7 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         );
 
         if(false === $insertado){
-            $this->ajax_json =array( 'exito' => false, 'msg'=> 'Error creating reply');// . $last_id );
+            $this->ajax_json =[ 'exito' => false, 'msg'=> 'Error creating reply'];// . $last_id );
             return;
         }
 
@@ -664,7 +724,7 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         }else{
             $msg_ok = 'Message sent and awaiting moderation...';
         }
-        $this->ajax_json =array( 'exito' => true, 'msg'=> $msg_ok);// . $last_id );
+        $this->ajax_json =[ 'exito' => true, 'msg'=> $msg_ok];// . $last_id );
     }
 
 
@@ -676,13 +736,18 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
         global $wpdb;
 
-        $sql_count = "SELECT COUNT(*) FROM
-        (SELECT COUNT(M.message_id) AS MID
-            FROM `". $wpdb->prefix ."sjb_board_messages` M
-            JOIN `". $wpdb->prefix ."sjb_board_participants` MP ON MP.message_id = M.message_id
-        WHERE (M.user_id = '$user_id' OR MP.user_id = '$user_id' )"
-        . ( (int)$this->options['moderation']? " AND M.status ='1' " : "" )
-        . " GROUP BY M.message_id) AS T";
+        $user_id = (int) $user_id;
+        $sql_count = $wpdb->prepare(
+            "SELECT COUNT(*) FROM
+            (SELECT COUNT(M.message_id) AS MID
+                FROM {$wpdb->prefix}sjb_board_messages M
+                JOIN {$wpdb->prefix}sjb_board_participants MP ON MP.message_id = M.message_id
+            WHERE (M.user_id = %d OR MP.user_id = %d) "
+            . ( (int) $this->options['moderation'] ? " AND M.status = 1 " : "" )
+            . " GROUP BY M.message_id) AS T",
+            $user_id,
+            $user_id
+        );
         // var_dump($sql_count);
         $total_registros =  (int)$wpdb->get_var( $sql_count);
         return $total_registros;
@@ -697,18 +762,14 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
         global $wpdb;
 
-        // $sql_count = "SELECT COUNT(*) FROM
-        // (SELECT COUNT(M.message_id) AS MID
-        //     FROM `". $wpdb->prefix ."sjb_board_messages` M
-        //     JOIN `". $wpdb->prefix ."sjb_board_participants` MP ON MP.message_id = M.message_id
-        // WHERE (M.user_id = '$user_id' OR MP.user_id = '$user_id' )"
-        // . ( (int)$this->options['moderation']? " AND M.status ='1' " : "" )
-        // . " AND MP.read IS NULL
-        // GROUP BY M.message_id) AS T";
-
-
-        $sql_count = "SELECT count(*) FROM `". $wpdb->prefix ."sjb_board_messages` M JOIN `". $wpdb->prefix ."sjb_board_participants` MP ON MP.message_id = M.message_id AND MP.user_id ='$user_id' ". ( (int)$this->options['moderation']? " AND M.status ='1' " : "" )."
-        AND MP.read IS NULL";
+        $user_id = (int) $user_id;
+        $sql_count = $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}sjb_board_messages M
+            JOIN {$wpdb->prefix}sjb_board_participants MP ON MP.message_id = M.message_id AND MP.user_id = %d
+            WHERE MP.read IS NULL "
+            . ( (int) $this->options['moderation'] ? " AND M.status = 1 " : "" ),
+            $user_id
+        );
         //echo $sql_count;
         $total_unread =  (int)$wpdb->get_var( $sql_count);
 
@@ -727,16 +788,24 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
         global $wpdb;
 
-        $sql = "
-        SELECT M.*, MP.user_id as receipt, MP.read,
-        (SELECT GROUP_CONCAT(T.user_id ) FROM `". $wpdb->prefix ."sjb_board_participants` T WHERE T.message_id=M.message_id GROUP BY T.message_id
-        ) AS participants
-        FROM `". $wpdb->prefix ."sjb_board_messages` M
-        JOIN `". $wpdb->prefix ."sjb_board_participants` MP ON MP.message_id=M.message_id
-        WHERE (M.user_id='$user_id' OR MP.user_id='$user_id')  ".
-        ( (int)$this->options['moderation']? " AND M.status ='1' " : "" ) .
-        " GROUP BY MP.message_id order BY M.date_add DESC
-        LIMIT ".$this->MAQUETADO->paginator_data->offset.", " .$this->MAQUETADO->paginator_data->pagesize.";";
+        // MP es la fila del usuario actual. Asi read no sale de otro participante.
+        $user_id = (int) $user_id;
+        $sql = $wpdb->prepare(
+            "SELECT M.*, MP.user_id AS receipt, MP.read,
+            (SELECT GROUP_CONCAT(T.user_id) FROM {$wpdb->prefix}sjb_board_participants T WHERE T.message_id = M.message_id) AS participants
+            FROM {$wpdb->prefix}sjb_board_messages M
+            LEFT JOIN {$wpdb->prefix}sjb_board_participants MP
+                ON MP.message_id = M.message_id AND MP.user_id = %d
+            WHERE (M.user_id = %d OR MP.user_id = %d) "
+            . ( (int) $this->options['moderation'] ? " AND M.status = 1 " : "" ) .
+            " ORDER BY M.date_add DESC
+            LIMIT %d, %d",
+            $user_id,
+            $user_id,
+            $user_id,
+            (int) $this->MAQUETADO->paginator_data->offset,
+            (int) $this->MAQUETADO->paginator_data->pagesize
+        );
 
         //echo $sql;
 
@@ -753,31 +822,89 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
     public function getSingleMesage($message_id = 0){
         global $wpdb;
 
-        if(!$message_id) return false;
+        $message_id = (int) $message_id;
+        if( ! $message_id ) return false;
 
-        $sql = "SELECT M.* FROM `". $wpdb->prefix ."sjb_board_messages` M WHERE message_id='$message_id'";
-        $message = $wpdb->get_row( $sql, OBJECT); //ARRAY_A | ARRAY_N | OBJECT | OBJECT_K // get_results
+        $message = $wpdb->get_row( $wpdb->prepare(
+            "SELECT M.* FROM {$wpdb->prefix}sjb_board_messages M WHERE message_id = %d",
+            $message_id
+        ), OBJECT );
         return $message;
 
     }
 
 
-    // De momento so colle unha mensaxe
+    // Notas del hilo que el usuario puede ver, de la mas antigua a la mas nueva.
+    // false si no puede ver la nota pedida.
     public function getThread($message_id = 0){
 
         global $wpdb;
 
+        $message_id = (int) $message_id;
+        if( ! $message_id || ! is_user_logged_in() ){
+            return false;
+        }
 
-        $thread_id = $this->getThreadID( $message_id);
+        $this->setUserData();
 
-        if(!$thread_id) return false;
+        $thread_id = (int) $this->getThreadID( $message_id );
+        if( ! $thread_id ){
+            return false;
+        }
 
-        // Lee todos os mensaxes do fío
-        // TODO
-        $sql = "SELECT M.* FROM `". $wpdb->prefix ."sjb_board_messages` M WHERE message_id='$message_id'";
-        $message_thread = $wpdb->get_row( $sql, OBJECT); //ARRAY_A | ARRAY_N | OBJECT | OBJECT_K // get_results
-        return $message_thread;
-        return false;
+        $filas = $wpdb->get_results( $wpdb->prepare(
+            "SELECT M.*, U.display_name,
+                (SELECT COUNT(*) FROM {$wpdb->prefix}sjb_board_participants P
+                    WHERE P.message_id = M.message_id AND P.user_id = %d) AS es_participante,
+                UM.meta_value AS author_committee
+            FROM {$wpdb->prefix}sjb_board_messages M
+            LEFT JOIN {$wpdb->prefix}users U ON U.ID = M.user_id
+            LEFT JOIN {$wpdb->prefix}usermeta UM ON UM.user_id = M.user_id AND UM.meta_key = 'committee'
+            WHERE M.thread_id = %d
+            ORDER BY M.date_add ASC, M.message_id ASC",
+            (int) $this->USER->ID,
+            $thread_id
+        ) );
+
+        if( ! $filas ){
+            return false;
+        }
+
+        $moderar = (int) $this->options['moderation'];
+        $es_admin = current_user_can( 'manage_options' );
+        $es_ejecutivo = $this->USER_INFO->role === 'executive_administrative';
+        $es_staff = $this->USER_INFO->role === 'administrative_staff';
+        $visibles = [];
+        $abierta_visible = false;
+
+        foreach( $filas as $nota ){
+            $es_autor = (int) $nota->user_id === (int) $this->USER->ID;
+            $es_participante = (int) $nota->es_participante > 0;
+            $es_staff_comite = $es_staff
+                && null !== $nota->author_committee
+                && (int) $nota->author_committee === (int) $this->USER_INFO->comitee_id;
+            $puede = $es_autor || $es_participante || $es_admin || $es_ejecutivo || $es_staff_comite;
+
+            if( ! $puede ){
+                continue;
+            }
+
+            // Con moderacion, un destinatario no ve pendientes ni rechazadas
+            if( $moderar && (int) $nota->status !== 1 && ! $es_autor && ! $es_admin && ! $es_ejecutivo && ! $es_staff_comite ){
+                continue;
+            }
+
+            if( (int) $nota->message_id === $message_id ){
+                $abierta_visible = true;
+            }
+            $visibles[] = $nota;
+        }
+
+        if( ! $abierta_visible ){
+            return false;
+        }
+
+        return $visibles;
     }
 
 
@@ -789,18 +916,18 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
         $updated = $wpdb->update(
             $tableparticipants,
-            array(
+            [
                 'read' => date('Y-m-d H:i:s')    // 0000-00-00 00:00:00
-            ),
-            array(
+            ],
+            [
                 'message_id' => $id_message,
                 'user_id' => $this->USER->ID
-            ), // Where
+            ], // Where
 
-            array(
+            [
                 '%s'    // value2
-            ),
-            array( '%d','%d' ) // Filtardo where
+            ],
+            [ '%d','%d' ] // Filtardo where
         );
 
         if(false !== $updated) return true;
@@ -813,6 +940,14 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
     public function getContacts( $ajax = true){
 
         global $wpdb;
+
+        // La agenda solo se entrega con sesion
+        if( ! is_user_logged_in() ){
+            if( $ajax ){
+                $this->ajax_json = [ 'exito' => false, 'msg' => 'User not authorized' ];
+            }
+            return [];
+        }
 
         // e que tale staría un ha busqueda por mail/display_name?? e usar autocomplete
         $sql = "SELECT U.ID, U.display_name , UM.meta_value as comitee_id, UM2.meta_value as caps
@@ -841,7 +976,7 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         return $contactos;
 
 
-        $this->ajax_json =array( 'exito' => true, 'msg'=>'Contactos cargados', 'datos'=>$contactos );
+        $this->ajax_json =[ 'exito' => true, 'msg'=>'Contactos cargados', 'datos'=>$contactos ];
 
     }
 
@@ -867,19 +1002,22 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
          *
          */
 
-        $contactos = array();
+        $contactos = [];
 
         //echo 'Role Usuario actual == ', $this->USER_INFO->role .'<br>';
 
         foreach ($tmp as $key => $c) {
 
-            // Falta que non se poida enviar a si mismo coño!!!
+            // Nadie puede enviarse una nota a si mismo
+            if( (int) $c['ID'] === (int) $this->USER->ID ){
+                continue;
+            }
 
             //echo ' - Usuario a comprobar: ' .  $c['display_name']. 'id('.$c['ID'].') Role:'. $c['role'] .'<BR>';
             // var_dump($this->USER_INFO->role);
             // die();
-            if(!in_array($this->USER_INFO->role, array('delegate','student_officer')) ){
-                $contactos[] = array('ID'=>$c['ID'], 'display_name'=>$c['display_name']);
+            if(!in_array($this->USER_INFO->role, ['delegate','student_officer']) ){
+                $contactos[] = ['ID'=>$c['ID'], 'display_name'=>$c['display_name']];
                 continue;
             }
 
@@ -890,12 +1028,12 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
 
                     // Só delegates e SO do seu comitee
-                    if( in_array($c['role'], array('delegate','student_officer') )
+                    if( in_array($c['role'], ['delegate','student_officer'] )
                     && (int)$this->USER_INFO->comitee_id == $c['comitee_id'])
                     {
                         //echo $this->USER_INFO->comitee_id . ' != ' .  $c['comitee_id'] . '<br>';
                         //echo $c['display_name'] . ' ' . $c['role'] . '   añadido<br>';
-                        $contactos[] = array('ID'=>$c['ID'], 'display_name'=>$c['display_name']);
+                        $contactos[] = ['ID'=>$c['ID'], 'display_name'=>$c['display_name']];
                     }
                 break;
 
@@ -903,11 +1041,11 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
                     // Só outros SO, aproval_panel e delegates do seu comitee
                 if(
-                    (in_array($c['role'], array('student_officer', 'approval_panel')))
+                    (in_array($c['role'], ['student_officer', 'approval_panel']))
                         ||
                         ( ($c['role'] == 'delegate') && (int)$this->USER_INFO->comitee_id == $c['comitee_id'] )
                 )
-                $contactos[] = array('ID'=>$c['ID'], 'display_name'=>$c['display_name']);
+                $contactos[] = ['ID'=>$c['ID'], 'display_name'=>$c['display_name']];
 
                 break;
             }
@@ -931,16 +1069,17 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
         global $wpdb;
 
-        $sql_count = "SELECT COUNT(*) FROM  `". $wpdb->prefix ."sjb_board_messages` M
-        LEFT JOIN `". $wpdb->prefix ."usermeta` UM ON UM.user_id=M.user_id AND UM.meta_key='committee'
-        WHERE M.status='$status_id' ";
+        $sql_count = "SELECT COUNT(*) FROM {$wpdb->prefix}sjb_board_messages M
+        LEFT JOIN {$wpdb->prefix}usermeta UM ON UM.user_id = M.user_id AND UM.meta_key = 'committee'
+        WHERE M.status = %d";
+        $args = [ $status_id ];
 
-        if($this->USER_INFO->role != 'executive_administrative')
-        $sql_count .= " AND UM.meta_value='".(int)$this->USER_INFO->comitee_id."'";
+        if( $this->USER_INFO->role != 'executive_administrative' ){
+            $sql_count .= " AND UM.meta_value = %s";
+            $args[] = (string) (int) $this->USER_INFO->comitee_id;
+        }
 
-        // echo $sql_count;
-
-        $total_registros =  (int)$wpdb->get_var( $sql_count);
+        $total_registros = (int) $wpdb->get_var( $wpdb->prepare( $sql_count, $args ) );
 
         return $total_registros;
     }
@@ -955,21 +1094,28 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
 
         global $wpdb;
-        $sql = "SELECT M.*, UM.meta_value as comitee_id, (SELECT GROUP_CONCAT(T.user_id ) FROM `". $wpdb->prefix ."sjb_board_participants` T WHERE T.message_id=M.message_id GROUP BY T.message_id ) AS participants
-        FROM `". $wpdb->prefix ."sjb_board_messages` M
-        LEFT JOIN `". $wpdb->prefix ."usermeta` UM ON UM.user_id=M.user_id AND UM.meta_key='committee'
-        WHERE M.status='$status_id'";
+        $sql = "SELECT M.*, UM.meta_value as comitee_id, (SELECT GROUP_CONCAT(T.user_id) FROM {$wpdb->prefix}sjb_board_participants T WHERE T.message_id = M.message_id) AS participants
+        FROM {$wpdb->prefix}sjb_board_messages M
+        LEFT JOIN {$wpdb->prefix}usermeta UM ON UM.user_id = M.user_id AND UM.meta_key = 'committee'
+        WHERE M.status = %d";
+        $args = [ $status_id ];
 
+        if( $this->USER_INFO->role != 'executive_administrative' ){
+            $sql .= " AND UM.meta_value = %s";
+            $args[] = (string) (int) $this->USER_INFO->comitee_id;
+        }
 
+        $sql .= " ORDER BY M.date_add DESC";
 
-        if($this->USER_INFO->role != 'executive_administrative')
-        $sql .= " HAVING comitee_id='".(int)$this->USER_INFO->comitee_id."' ";
+        $offset = (int) $this->MAQUETADO->paginator_data->offset;
+        $pagesize = (int) $this->MAQUETADO->paginator_data->pagesize;
+        if( $offset >= 0 && $pagesize ){
+            $sql .= " LIMIT %d, %d";
+            $args[] = $offset;
+            $args[] = $pagesize;
+        }
 
-
-        $sql .= " order BY M.date_add DESC";
-
-        if($this->MAQUETADO->paginator_data->offset>=0 && $this->MAQUETADO->paginator_data->pagesize)
-        $sql .= " LIMIT ".$this->MAQUETADO->paginator_data->offset.", " .$this->MAQUETADO->paginator_data->pagesize.";";
+        $sql = $wpdb->prepare( $sql, $args );
 
         //echo $sql;
 
@@ -1039,30 +1185,30 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
         static::$add_script = true; // Forzamos inclusion dos scripts propios!
         // Todo discriminar!
 
-		// normalize attribute keys, lowercase
-	    $atts = array_change_key_case((array)$atts, CASE_LOWER);
+        // normalize attribute keys, lowercase
+        $atts = array_change_key_case((array)$atts, CASE_LOWER);
 
         // override default attributes with user attributes
         // Podemos definir un array en vez de usalo en línea:
-        $default_params = array(
+        $default_params = [
             'title'         => 'CANCREXO RULEZ este es el shortcode',
             'un_parametro'  => 'Un valor para param1',
             'otro_parametro'  => 'Un valor para param2',
 
-        );
+        ];
 
-	    $wporg_atts = shortcode_atts($default_params, $atts, $tag);
+        $wporg_atts = shortcode_atts($default_params, $atts, $tag);
 
-	    // $salida = '';
-	    // $salida .= '<div class="sjb-box">';
-	    // $salida .= '<h2>' . esc_html__($wporg_atts['title'], static::SJB_TD) . '</h2>';
-	    // // enclosing tags
-	    // if (!is_null($content)) {
-	    //     // secure output by executing the_content filter hook on $content
-	    //     $salida .= apply_filters('the_content', $content);
+        // $salida = '';
+        // $salida .= '<div class="sjb-box">';
+        // $salida .= '<h2>' . esc_html__($wporg_atts['title'], 'sjb_board') . '</h2>';
+        // // enclosing tags
+        // if (!is_null($content)) {
+        //     // secure output by executing the_content filter hook on $content
+        //     $salida .= apply_filters('the_content', $content);
 
-	    //     // run shortcode parser recursively
-	    //     $salida .= do_shortcode($content);
+        //     // run shortcode parser recursively
+        //     $salida .= do_shortcode($content);
         // }
         //$this->setUserData();
         $Maquetado = Sjbboard\classes\SJBMaquetado::getInstance();
@@ -1084,17 +1230,17 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
         static::$add_script = true; // Forzamos inclusion dos scripts propios!
 
-		// normalize attribute keys, lowercase
-	    $atts = array_change_key_case((array)$atts, CASE_LOWER);
+        // normalize attribute keys, lowercase
+        $atts = array_change_key_case((array)$atts, CASE_LOWER);
 
         // override default attributes with user attributes
         // Podemos definir un array en vez de usalo en línea:
-        $default_params = array(
+        $default_params = [
             'title'         => 'CANCREXO RULEZ este es el shortcode',
             'un_parametro'  => 'Un valor para param1',
             'otro_parametro'  => 'Un valor para param2',
 
-        );
+        ];
         $wporg_atts = shortcode_atts($default_params, $atts, $tag);
 
 
@@ -1108,17 +1254,17 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
         static::$add_script = true; // Forzamos inclusion dos scripts propios!
 
-		// normalize attribute keys, lowercase
-	    $atts = array_change_key_case((array)$atts, CASE_LOWER);
+        // normalize attribute keys, lowercase
+        $atts = array_change_key_case((array)$atts, CASE_LOWER);
 
         // override default attributes with user attributes
         // Podemos definir un array en vez de usalo en línea:
-        $default_params = array(
+        $default_params = [
             'un_parametro'  => 'Un valor para param1',
             'otro_parametro'  => 'Un valor para param2',
-        );
+        ];
 
-	    $wporg_atts = shortcode_atts($default_params, $atts, $tag);
+        $wporg_atts = shortcode_atts($default_params, $atts, $tag);
         $template =  $this->my_locate_template( 'message-thread', 'front');
         require_once( $template);
 
@@ -1129,17 +1275,17 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
         static::$add_script = true; // Forzamos inclusion dos scripts propios!
 
-		// normalize attribute keys, lowercase
-	    $atts = array_change_key_case((array)$atts, CASE_LOWER);
+        // normalize attribute keys, lowercase
+        $atts = array_change_key_case((array)$atts, CASE_LOWER);
 
         // override default attributes with user attributes
         // Podemos definir un array en vez de usalo en línea:
-        $default_params = array(
+        $default_params = [
             'title'         => 'CANCREXO RULEZ este es el shortcode',
             'un_parametro'  => 'Un valor para param1',
             'otro_parametro'  => 'Un valor para param2',
 
-        );
+        ];
         $wporg_atts = shortcode_atts($default_params, $atts, $tag);
 
         $template =  $this->my_locate_template( 'message-moderation', 'front');
@@ -1159,6 +1305,61 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
     */
 
+
+    // Activacion: los indices tambien se crean aqui, ademas de en init tras una actualizacion
+    public static function on_activation() {
+        parent::on_activation();
+        if ( ! current_user_can( 'activate_plugins' ) ) {
+            return;
+        }
+        self::upgrade_database();
+    }
+
+    // Indices de la version 2.0. No toca filas. Si la opcion ya es 2.0, no hace nada.
+    public static function upgrade_database() {
+        $db_version = get_option( 'sjb_board_db_version', '0' );
+        if ( version_compare( $db_version, '2.0', '>=' ) ) {
+            return;
+        }
+
+        global $wpdb;
+
+        $messages = $wpdb->prefix . 'sjb_board_messages';
+        $participants = $wpdb->prefix . 'sjb_board_participants';
+
+        $messages_ok = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $messages ) ) );
+        $participants_ok = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $participants ) ) );
+        if ( $messages_ok !== $messages || $participants_ok !== $participants ) {
+            return;
+        }
+
+        $pendientes = [
+            [ $messages, 'sjb_msg_user_id', 'user_id' ],
+            [ $messages, 'sjb_msg_thread_id', 'thread_id' ],
+            [ $messages, 'sjb_msg_status', 'status' ],
+            [ $participants, 'sjb_part_user_id', 'user_id' ],
+        ];
+
+        foreach ( $pendientes as $indice ) {
+            list( $table, $name, $column ) = $indice;
+            $existentes = $wpdb->get_results( "SHOW INDEX FROM `{$table}`" );
+            $nombres = [];
+            if ( $existentes ) {
+                foreach ( $existentes as $fila ) {
+                    $nombres[] = $fila->Key_name;
+                }
+            }
+            if ( in_array( $name, $nombres, true ) ) {
+                continue;
+            }
+            $creado = $wpdb->query( "ALTER TABLE `{$table}` ADD KEY `{$name}` (`{$column}`)" );
+            if ( false === $creado ) {
+                return;
+            }
+        }
+
+        update_option( 'sjb_board_db_version', '2.0' );
+    }
 
     public function setUserData(){
             // Leer info de usuario:
@@ -1183,9 +1384,12 @@ class SJB_BOARD extendS Sjbboard\classes\SJBPluginClass{
 
     // Get thread_id from message in db
     public function  getThreadID($message_id = 0){
-        $message_id = (int)$message_id;
+        $message_id = (int) $message_id;
         global $wpdb;
-        $thread_id = $wpdb->get_var("SELECT thread_id FROM ". $wpdb->prefix ."sjb_board_messages WHERE message_id='$message_id';");
+        $thread_id = $wpdb->get_var( $wpdb->prepare(
+            "SELECT thread_id FROM {$wpdb->prefix}sjb_board_messages WHERE message_id = %d",
+            $message_id
+        ) );
         return $thread_id;
     }
 

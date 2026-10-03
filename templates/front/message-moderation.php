@@ -9,7 +9,7 @@ if(!is_user_logged_in()){
     return; //p.e. mensaxe de Please log in!! con enlace!! ou redrect ahome e pista
 }
 
-if(!in_array($this->USER_INFO->role, array('administrative_staff', 'executive_administrative')) ){
+if(!in_array($this->USER_INFO->role, ['administrative_staff', 'executive_administrative']) ){
    return;
 }
 
@@ -52,11 +52,11 @@ $messages2moderate = $this->getMessagesToModerate();
  <table id="message-board" class="sjb-table">
         <!-- THEAD NUN FUTURO -->
         <?php
-        $links = array(
+        $links = [
             0 => 'MODERATION',
             1 => 'APPROVED NOTES',
             2 => 'REJECTED NOTES'
-        );
+        ];
         $status_id = (int)get_query_var('status_id', 0); // status to show
         $salida = '';
         foreach($links as $k=>$texto){

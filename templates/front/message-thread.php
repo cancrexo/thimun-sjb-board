@@ -43,36 +43,50 @@ if(!$THREAD){
     </div>';
     return;
 }
-//var_dump($THREAD);
-$this->setMessageAsRead($message_id);
-$sender_meta  = get_userdata($THREAD->user_id);
 
+$nota_abierta = null;
+foreach( $THREAD as $nota ){
+    if( (int) $nota->message_id === $message_id ){
+        $nota_abierta = $nota;
+    }
+    // Leidas solo las notas en las que participa
+    if( (int) $nota->es_participante ){
+        $this->setMessageAsRead( $nota->message_id );
+    }
+}
 
 ?>
-    <!-- Presentacion Mensaxe -->
+    <!-- Presentacion Mensaxe. Reply sigue apuntando a la nota abierta. -->
     <div id="old-messsage-wrapper">
-        <?php // Parent message id e o unico que necesitas ?>
-        <input type="hidden" id="destinatario" value="<?php  echo (int)$THREAD->user_id ?>"/>
-        <input type="hidden" id="msg_id" value="<?php  echo (int)$THREAD->message_id ?>"/>
+        <input type="hidden" id="destinatario" value="<?php echo (int) $nota_abierta->user_id ?>"/>
+        <input type="hidden" id="msg_id" value="<?php echo (int) $nota_abierta->message_id ?>"/>
 
-        <div class="compose-block FROM">
-            <label>From: <span><?php  echo $sender_meta->display_name?></span></label>
-        </div>
+        <?php foreach( $THREAD as $nota ): ?>
+        <article class="thread-note">
+            <div class="compose-block FROM">
+                <label>From: <span><?php echo esc_html( (string) $nota->display_name ) ?></span></label>
+            </div>
 
-        <!-- Subject -->
-        <div class="compose-block subject">
-            <label>Subject: <span><?php  echo esc_html($THREAD->subject) ?></span></label>
-        </div>
+            <div class="compose-block subject">
+                <label>Date: <span><?php echo esc_html( (string) $nota->date_add ) ?></span></label>
+            </div>
 
-        <!-- Message -->
-        <div class="compose-block message-body">
-            <label>Message</label>
-            <div class="old-message"><?php  echo nl2br(esc_html($THREAD->message)) ?></div>
-        </div>
+            <div class="compose-block subject">
+                <label>Subject: <span><?php echo esc_html( (string) $nota->subject ) ?></span></label>
+            </div>
 
+            <div class="compose-block message-body">
+                <label>Message</label>
+                <div class="old-message"><?php echo nl2br( esc_html( (string) $nota->message ) ) ?></div>
+            </div>
+        </article>
+        <?php endforeach; ?>
+
+        <?php if( (int) $nota_abierta->user_id !== (int) $this->USER->ID ): ?>
         <div class="compose-block submit-button">
             <button id="sjbboard-reply" class="sjbboard-submit is-visible">Reply</button>
         </div>
+        <?php endif; ?>
     </div>
 
     <div id="reply-messsage-wrapper">

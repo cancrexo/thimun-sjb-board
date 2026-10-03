@@ -776,6 +776,12 @@ button.sjbboard-submit:hover, button.sjbboard-submit:active{
     margin-bottom:2em;
 }
 
+#old-messsage-wrapper .thread-note{
+    margin-bottom: 1.5em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid var(--color-borde);
+}
+
     #old-messsage-wrapper div.compose-block{
         margin-bottom: 5px;
     }

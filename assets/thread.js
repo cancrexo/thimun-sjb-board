@@ -106,9 +106,8 @@
                 console.log(jsonData); //end!!
                 if(jsonData.exito){
                     showPreloader('exito', jsonData.msg); //Cambia a mensaxe do preloader
-                    //https://thimun-online.org/sjb-message-board/
                     setTimeout(function(){closebutton.click();
-                        location.assign('https://thimun-online.org/sjb-message-board/');
+                        location.assign(SJB_BOARD.board_url);
                      }, 1500); // Pecha Preloader
                     console.log(jsonData); //end!!
 
@@ -137,7 +136,7 @@
         |_____| |_| |___/  \__|  \___| |_| |_|  \___| |_|    |___/
     */
 
-    //if(replyButton)
+    if(replyButton)
     replyButton.addEventListener('click', () => {
         enable_reply();
     });

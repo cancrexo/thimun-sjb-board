@@ -18,7 +18,7 @@ class SJBTools{
 
 	static function filter_params( $validos, $recibidos){
 
-	    $out  = array();
+	    $out  = [];
 	   	$validos = (array) $validos;
 	   	$recibidos = (array) $recibidos;
 	   	//error_log("Validos:\r\n". var_export($validos, true));
@@ -180,7 +180,7 @@ class SJBTools{
 		biolanor@gmail.com (sacada de php.net)
 	----------------------------------------------------------------------------------*/
 	static function format_size( $size ) {
-	      $sizes = array(" Bytes", " KB", " MB", " GB", " TB", " PB", " EB", " ZB", " YB");
+	      $sizes = [" Bytes", " KB", " MB", " GB", " TB", " PB", " EB", " ZB", " YB"];
 	      if ($size == 0) { return('n/a'); } else {
 	      return (round($size/pow(1024, ($i = floor(log($size, 1024)))), 2) . $sizes[$i]); }
 	}
@@ -224,8 +224,8 @@ class SJBTools{
 
         $difference =  $now - $timestamp;
 
-		$periods = array('sec', 'min', 'hour', 'day', 'week', 'month', 'year', 'decade');
-        $lengths = array('60', '60', '24', '7', '4.35', '12', '10');
+		$periods = ['sec', 'min', 'hour', 'day', 'week', 'month', 'year', 'decade'];
+        $lengths = ['60', '60', '24', '7', '4.35', '12', '10'];
 
 		if ($difference > 0) { // this was in the past time
             $ending = 'ago';
@@ -258,7 +258,7 @@ class SJBTools{
 		$select = "";
 		if( isset($parametros['antes'] ) ){
 			$antes = $parametros['antes'] == 1 ? 'Seleccione...' :  $parametros['antes'] ;
-			$arrayPrevio = array( 0=>$antes);
+			$arrayPrevio = [ 0=>$antes];
 			//array_unshift( $arr, ( $parametros["antes"] == 1 ? "Seleccione..." :  $parametros["antes"] ) );
 			$arr = $arrayPrevio + $arr;  // Para evitar que me reordena as claves
 		}
@@ -330,7 +330,7 @@ class SJBTools{
 	 * @param array $params
 	 * @return string
 	 */
-	public static function setHtmlDataParams($params = array()){
+	public static function setHtmlDataParams($params = []){
 		$data_str ='';
 		$patron = 'data-%s="%s" ';
 		foreach ($params as $k=>$v){

@@ -36,15 +36,7 @@
    if(table_messages)
    table_messages.addEventListener('click', function(e) {
        // Simulamos eventos on de jQuery incluso para elementos live!
-       if(e.target && e.target.classList.contains('read')) {
-           // boton leer
-           console.log("leer mensaxe (e contestar se queres");
-           let tr =e.target.parentElement.parentElement;
-           let id = tr.dataset.id;
-           console.log(id);
-           location.assign("http://www.mozilla.org"); // o
-
-       }else   if(e.target && e.target.classList.contains('reply')) {
+       if(e.target && e.target.classList.contains('reply')) {
         // boton leer
         console.log("contestar mensaxe");
     }

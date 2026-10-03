@@ -58,8 +58,8 @@ class SJBMaquetado{
     public function __construct(  ){
 
         // filtros por defecto
-        add_filter('avatar_list_element', array(&$this, 'filter_avatar_list_element'), 10, 1);
-        add_filter('avatar_list', array(&$this, 'filter_avatar_list'), 10, 1);
+        add_filter('avatar_list_element', [$this, 'filter_avatar_list_element'], 10, 1);
+        add_filter('avatar_list', [$this, 'filter_avatar_list'], 10, 1);
         //do_action( 'sjbmaquetado');
     }
 
