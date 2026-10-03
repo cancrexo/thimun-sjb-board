@@ -4,7 +4,7 @@
     const
         btnUpdate    = document.querySelector('.update-sjb-form-options'),
         div_messages = document.querySelector('.ajax-save-result'),
-        tabButtons   = document.querySelectorAll('.sjb-tab'),
+        tabButtons   = document.querySelectorAll('.plugin-options .nav-tab'),
         panels       = document.querySelectorAll('.sjb-tab-panel');
 
     // 1 si el switch esta marcado, 0 si no
@@ -14,9 +14,10 @@
     };
 
     tabButtons.forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
             const id = btn.dataset.tab;
-            tabButtons.forEach((b) => b.classList.toggle('is-active', b === btn));
+            tabButtons.forEach((b) => b.classList.toggle('nav-tab-active', b === btn));
             panels.forEach((panel) => {
                 const activo = panel.dataset.panel === id;
                 panel.classList.toggle('is-active', activo);

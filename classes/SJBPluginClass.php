@@ -293,7 +293,7 @@ class SJBPluginClass{
         // JS
         wp_enqueue_script( $this->slug . '-jquery-ui', ( '//code.jquery.com/ui/1.12.0/jquery-ui.min.js' ), [ 'jquery' ],  '1.12', true );
         wp_enqueue_style( $this->slug . '-jquery-ui', ( '//code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css' ) );
-        wp_enqueue_script( $this->slug . '-admin', $this->path2assets .'admin.js', [ 'jquery' ], '1.0', true );
+        wp_enqueue_script( $this->slug . '-admin', $this->path2assets .'admin.js', [ 'jquery' ], filemtime( $this->plugindir . 'assets/admin.js' ), true );
         wp_localize_script( $this->slug. '-admin', static :: WP_LOCALIZE_VARNAME,
             [
                 'mensaje'		=> 'Dale alegria macarena',
@@ -302,7 +302,7 @@ class SJBPluginClass{
              ]
         );
         // CSS
-        wp_enqueue_style( $this->slug . '-admin', $this->path2assets .'admin.css' );
+        wp_enqueue_style( $this->slug . '-admin', $this->path2assets .'admin.css', [], filemtime( $this->plugindir . 'assets/admin.css' ) );
 
     }// add_admin_scripts end
 
