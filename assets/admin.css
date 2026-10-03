@@ -29,120 +29,91 @@
   background:rgba(255, 0,0,0.15);
 }
 
+/* Pestanas de la pantalla de ajustes */
+.sjb-tabs{
+    display: flex;
+    gap: 0;
+    margin: 0 0 1.5em;
+    border-bottom: 1px solid var(--gris-clarito);
+}
+.sjb-tab{
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: none;
+    padding: 0.55em 1.1em;
+    margin: 0 0.25em -1px 0;
+    cursor: pointer;
+    font-size: 14px;
+    color: #1d2327;
+}
+.sjb-tab.is-active{
+    border-color: var(--gris-clarito);
+    border-bottom-color: #fff;
+    font-weight: 600;
+    background: #fff;
+}
+.sjb-tab-panel[hidden]{
+    display: none;
+}
+.sjb-coming-soon{
+    margin: 1em 0.5em;
+    color: var(--gris-texto);
+    font-size: 16px;
+}
 
-
-
-/*switches personalizados*/
+/* Switch tipo Bootstrap, un checkbox por opcion */
 div.switches-holder{
-  width:100%;
-  display:flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  border:0px solid;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 0 1.5em;
 }
-
-.sjb-switcher-wrapper{
-  position: relative;
-  border:0px dashed #c00;
-  flex-basis:32%;
-  margin:0 0 2em;
+.sjb-form-switch{
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    margin: 0 0 1em;
 }
-.sjb-switch  input{
-	display:none;
+.sjb-box .sjb-form-switch input[type="checkbox"]{
+    appearance: none;
+    -webkit-appearance: none;
+    width: 2.5em;
+    height: 1.35em;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 2em;
+    background-color: #ccc;
+    box-shadow: none;
+    cursor: pointer;
+    position: relative;
+    flex: 0 0 auto;
+    transition: background-color .15s ease-in-out;
 }
-.sjb-switch {
-  position: relative;
-  margin: 0 auto 0;
-  height: 46px;
-  width: 100%;
-  max-width:253px;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 3px;
-  -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
+.sjb-box .sjb-form-switch input[type="checkbox"]::before{
+    content: "";
+    position: absolute;
+    width: 1.05em;
+    height: 1.05em;
+    border-radius: 50%;
+    background: #fff;
+    top: 0.15em;
+    left: 0.15em;
+    transition: transform .15s ease-in-out;
 }
-
-.sjb-switch-label {
-  position: relative;
-  z-index: 2;
-  float: left;
-  width: 50%;
-  line-height: 46px;
-  font-size: 13px;
-  color: #000;
-  text-align: center;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.45);
-  cursor: pointer;
+.sjb-box .sjb-form-switch input[type="checkbox"]:checked{
+    background-color: #0d6efd;
 }
-
-/*@media (min-width:320px) and (max-width: 480px) {*/
-
-
-.sjb-switch-label:active {
-  font-weight: bold;
+.sjb-box .sjb-form-switch input[type="checkbox"]:checked::before{
+    transform: translateX(1.15em);
 }
-
-.sjb-switch-label-off {
-  padding-left: 2px;
+.sjb-box .sjb-form-switch input[type="checkbox"]:focus{
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
-
-.sjb-switch-label-on {
-  padding-right: 2px;
+.sjb-form-switch label{
+    cursor: pointer;
+    font-size: 14px;
 }
-
-.sjb-switch-input {
-  display: none;
-}
-
-.sjb-switch-input{
-	 -webkit-transition: 0.15s ease-out;
-  -moz-transition: 0.35s ease-out;
-  -o-transition: 0.35s ease-out;
-  transition: 0.35s ease-out;
-}
-
-.sjb-switch-input:checked + .sjb-switch-label {
-  font-weight: bold;
-  color: #fff;
-  text-shadow: 0 1px rgba(0, 0, 0, 0.55);
-}
-
-
-/*Boton*/
-.sjb-switch-selection {
-  display: block;
-  position: absolute;
-  z-index: 1;
-  top: 2px;
-  left: 2px;
-  width: 50%;
-  height: 42px;
-  background: #226732;
-  border-radius: 3px;
-  background-image: -webkit-linear-gradient(top, #226732, #38e25f);
-  background-image: -moz-linear-gradient(top, #226732, #38e25f);
-  background-image: -o-linear-gradient(top, #226732, #38e25f);
-  background-image: linear-gradient(to bottom, #226732, #38e25f);
-  -webkit-box-shadow: inset 0 1px rgba(255, 255, 255, 0.5), 0 0 2px rgba(0, 0, 0, 0.2);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.5), 0 0 2px rgba(0, 0, 0, 0.2);
-  -webkit-transition: left 0.30s ease-out;
-  -moz-transition: left 0.30s ease-out;
-  -o-transition: left 0.30s ease-out;
-  transition: left 0.30s ease-out;
-}
-
-
-.sjb-switch-input:checked + .sjb-switch-label-on ~ .sjb-switch-selection {
-  /* Note: left: 50% doesn't transition in WebKit */
-  left: calc(50% - 2px);
-  background-image: -webkit-linear-gradient(top, #110000, #cc0000);
-  background-image: -moz-linear-gradient(top, #110000, #cc0000);
-  background-image: -o-linear-gradient(top, #110000, #cc0000);
-  background-image: linear-gradient(to bottom, #990000, #ff0000);
-
-
-}
-
 
 div.wrap.sjb-box{
   width:90%;
@@ -160,27 +131,12 @@ div.wrap.sjb-box > h3{
 }
 
 
-.ajax-save-result{display:inline-block;}
-.ajax-save-result span{
-	padding:0 20px;
-}
-.ajax-save-result span:not(.hidden){
-}
-.ajax-save-result span.exito{color:#0c0;}
-.ajax-save-result span.error{color:#c00;}
-
-
+.ajax-save-result{display:inline-block; margin-left: 0.75em;}
+.ajax-save-result.hidden{display:none;}
+.ajax-save-result.exito{color:#0c0;}
+.ajax-save-result.error{color:#c00;}
 
 a.reenviar{cursor:pointer;}
-
-
-
-
-
-
-
-
-
 
 /*TABLAS*/
 table thead tr th#plantilla{width:120px;}

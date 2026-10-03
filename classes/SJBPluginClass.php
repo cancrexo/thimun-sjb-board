@@ -37,16 +37,6 @@ class SJBPluginClass{
         $nada = ''
     ;
 
-
-    // Reusable backend elements
-    static $switchpattern = '<div class="sjb-switcher-wrapper"><h3>%2$s</h3><div class="sjb-switch">
-    <input type="radio" class="sjb-switch-input" name="%1$s" value="1" id="%3$s" %7$s>
-    <label for="%3$s" class="sjb-switch-label sjb-switch-label-off" >%4$s</label>
-    <input type="radio" class="sjb-switch-input" name="%1$s" value="0" id="%5$s" %8$s>
-    <label for="%5$s" class="sjb-switch-label sjb-switch-label-on" >%6$s</label>
-    <span class="sjb-switch-selection"></span>
-    </div></div>';
-
     public
 
         $pluginpath = '',

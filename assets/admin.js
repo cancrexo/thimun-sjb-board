@@ -1,80 +1,69 @@
-
-
 (() => {
-	'use strict';
+    'use strict';
 
     const
-        btnUpdate  	        = document.querySelector('.update-sjb-form-options'),
-        moderation  	    = document.querySelectorAll('input[name="moderation"]'),
-        in_footer  	        = document.querySelectorAll('input[name="in_footer"]'),
-        delete_onuninstall  = document.querySelectorAll('input[name="delete_onuninstall"]'),
-        debug_mode  	    = document.querySelectorAll('input[name="debug_mode"]'),
-        div_messages        = document.querySelector('.ajax-save-result');
+        btnUpdate    = document.querySelector('.update-sjb-form-options'),
+        div_messages = document.querySelector('.ajax-save-result'),
+        tabButtons   = document.querySelectorAll('.sjb-tab'),
+        panels       = document.querySelectorAll('.sjb-tab-panel');
 
-    btnUpdate.addEventListener('click', () => {
-        if(validateForm())
-           saveOptionsForm();
-	})
+    // 1 si el switch esta marcado, 0 si no
+    const valorSwitch = (id) => {
+        const input = document.getElementById(id);
+        return input && input.checked ? 1 : 0;
+    };
 
-    // Devolve valor dun grupo  de checboxes, raiods, etc
-    const getchekboxesGroup = ( coleccion )=>{
-        for(let C of coleccion){
-            if(C.checked) return C.value;
-        }
-        return -1;
-    }
-    const validateForm = ()=>{
-		console.log('Validated!');
-		return true;
-	}
+    tabButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.tab;
+            tabButtons.forEach((b) => b.classList.toggle('is-active', b === btn));
+            panels.forEach((panel) => {
+                const activo = panel.dataset.panel === id;
+                panel.classList.toggle('is-active', activo);
+                panel.hidden = !activo;
+            });
+        });
+    });
 
-    const toggleSaveMessage = (exito = true) =>{
-        console.log('Saved ' +  exito );
-		let capa = exito ? 'exito' : 'error';
-        div_messages.classList.remove('hidden');
-        setTimeout(()=>  div_messages.classList.add('hidden'),1000);
+    if (btnUpdate) {
+        btnUpdate.addEventListener('click', () => {
+            saveOptionsForm();
+        });
     }
 
-	const  saveOptionsForm= ()=>{
+    const toggleSaveMessage = (exito = true) => {
+        div_messages.textContent = exito ? 'Saved!!' : 'Error!!';
+        div_messages.classList.remove('hidden', 'exito', 'error');
+        div_messages.classList.add(exito ? 'exito' : 'error');
+        setTimeout(() => div_messages.classList.add('hidden'), 1000);
+    };
 
-       let data2Send = {
+    const saveOptionsForm = () => {
+        let data2Send = {
             sjb_noncename: SJB_BOARD.ajax_nonce,
-            action : SJB_BOARD.ajax_action, //'topotamadre', //WP action
+            action: SJB_BOARD.ajax_action,
             quefasemos: 'backend',
-            myplugindata:{
-                // tes un node list, hai que iterar o bucle
-                moderation:  parseInt(getchekboxesGroup(moderation), 10),
-                in_footer:  parseInt(getchekboxesGroup(in_footer), 10),
-                delete_onuninstall:  parseInt(getchekboxesGroup(delete_onuninstall), 10),
-            	debug_mode:parseInt(getchekboxesGroup(debug_mode), 10),
+            myplugindata: {
+                moderation: valorSwitch('moderation'),
+                in_footer: valorSwitch('in_footer'),
+                delete_onuninstall: valorSwitch('delete_onuninstall'),
+                debug_mode: valorSwitch('debug_mode'),
             }
-
-        }
-
-        //console.log(data2Send);
-
+        };
 
         jQuery.ajax({
-            url: ajaxurl ,
-            dataType: "json",
+            url: ajaxurl,
+            dataType: 'json',
             type: 'post',
             cache: false,
             data: data2Send,
-
-            success: function ( jsonData ) {
-                console.log(jsonData);
+            success: function (jsonData) {
                 toggleSaveMessage(jsonData.exito);
-
             },
-            error: function(jqXHR, textStatus, errorThrown){
-            	toggleSaveMessage(false);
-                console.log(textStatus);
-                console.log(errorThrown);
-                console.log(jqXHR);
+            error: function () {
+                toggleSaveMessage(false);
             }
-        })
-    }
-
-
+        });
+    };
 
 })();
