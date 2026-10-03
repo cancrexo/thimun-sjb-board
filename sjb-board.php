@@ -30,8 +30,8 @@ register_activation_hook(    __FILE__, [  'SJB_BOARD', 'on_activation'  ]  );
 register_deactivation_hook(  __FILE__, [  'SJB_BOARD', 'on_deactivation'  ]  );
 
 
-//register_uninstall_hook(     __FILE__, [  'SJB_BOARD', 'on_uninstall'  ]  );
-//add_action(  'plugins_loaded', [  'SJB_BOARD', 'init'  ]  );
+// register_uninstall_hook(     __FILE__, [  'SJB_BOARD', 'on_uninstall'  ]  );
+// add_action(  'plugins_loaded', [  'SJB_BOARD', 'init'  ]  );
 
 /*
     El plugin crea una página en el sistema wordpress. Dicha página es la que, a traves de un shortcode
