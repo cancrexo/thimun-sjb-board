@@ -273,15 +273,11 @@ class SJBPluginClass{
 
     */
     public function plugin_settings_link($links, $plugin_file, $plugin_data, $context) {
-        // A url de acceso dependerá de onde esté 'colgado':
-        if(static::$perchero != ''){
-            $url_settings = 'admin';
-            $url = get_admin_url() .'admin.php?page='. static::$perchero;
-        }else{
-
-            $url_settings =  static::$perchero_default;
-            $url = get_admin_url() . static::$perchero_default . '?page='. $this->slug;
-
+        // Colgado de Ajustes: options-general.php?page=slug. Un menú propio va por admin.php.
+        if (static::$perchero === '' || static::$perchero === static::$perchero_default) {
+            $url = get_admin_url() . static::$perchero_default . '?page=' . $this->slug;
+        } else {
+            $url = get_admin_url() . 'admin.php?page=' . $this->slug;
         }
         $settings_link = '<a href="'.$url.'">' . __( 'Ajustes', $this->slug ) . '</a>';
         array_unshift( $links, $settings_link );
